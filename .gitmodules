@@ -1,0 +1,3 @@
+[submodule "PythonSake"]
+	path = PythonSake
+	url = git@github.com:OpenMinimed/PythonSake.git
