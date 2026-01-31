@@ -46,7 +46,6 @@ class PumpAdvertiser():
 
         # gen a mobile name
         self.mobile_name = gen_mobile_name()
-        #self.logger.info(f"generated mobile name: {self.mobile_name}")
         
         # run btmgmt commands
         for c in self.startup_commands:
@@ -60,15 +59,15 @@ class PumpAdvertiser():
 
     def __create_adv_cmd(self) -> str:
 
-        data = "02 01 06 "  # flags - we have turned BR/EDR off
-        data += f"12 FF F901 00 {self.mobile_name.encode().hex()} 00 "  # manufacturer data
+        data = "02 01 06 "  # flags - we have turned BR/EDR off in self.startup_commands
+        data += f"12 FF F901 00 {self.mobile_name.encode().hex()} 00 " # manufacturer data
         data += "02 0A 01 "  # tx power
-        data += "03 03 82 FE "  # 16-bit service UUID
+        data += "03 03 82 FE "  # 16-bit service UUID of 0xfe82
 
         data = data.replace(" ", "")
 
         # timeout is how long the bluez object lives (??)
-        # set duration and timeout to the same for now
+        # set duration and timeout to the same for now, idk
 
         full_cmd = f"sudo btmgmt add-adv -d {data} -t {self.adv_time} -D {self.adv_time} {self.instance_id}"
         return full_cmd
@@ -79,18 +78,14 @@ class PumpAdvertiser():
 
     def stop_adv(self) -> None:
         self.logger.info("advertising stopped")
+
+        # WARNING! this is a very hacky and deliberate almost-race-condition... dont change these two lines 
         self.adv_started = None
         self.__clear_adv()
+        
         return
 
     def start_adv(self) -> None:
-        """
-        time is in seconds
-        """
-        # for i in range(4):
-        #     self.stop_adv() # start with clearing all, since we might have bluezero's in the list
-        #     sleep(0.25)
-        #sleep(2) # wait for things to normalize
         if self.adv_started != None:
             self.logger.error(f"advertisement already running? skipping...")
             return
@@ -113,27 +108,23 @@ class PumpAdvertiser():
         return
     
     def __adv_thread(self):
-        # hacky, since we bluezero also starts an advertisement, which is not good for us and we need to "fight it"
+        # hacky, since bluezero also starts an advertisement, which is not good for us and we need to "fight it"
         while True:
-
             if self.adv_started == None:
                 return
-            
             cmd = self.__create_adv_cmd()
             exec(cmd)
             sleep(self.adv_time)
             self.__clear_adv()
 
-    def __get_advertisement_count(self):
-        result = subprocess.run(
-            ["sudo", "btmgmt", "advinfo"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-        match = re.search(r"Instances list with (\d+) item", result.stdout)
-        if not match:
-            raise RuntimeError(f"Could not find advertisement count in: {result.stdout}")
-
-        return int(match.group(1))
+    # def __get_advertisement_count(self):
+    #     result = subprocess.run(
+    #         ["sudo", "btmgmt", "advinfo"],
+    #         capture_output=True,
+    #         text=True,
+    #         check=True,
+    #     )
+    #     match = re.search(r"Instances list with (\d+) item", result.stdout)
+    #     if not match:
+    #         raise RuntimeError(f"Could not find advertisement count in: {result.stdout}")
+    #     return int(match.group(1))

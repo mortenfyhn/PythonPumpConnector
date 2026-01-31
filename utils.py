@@ -25,22 +25,6 @@ def exec(cmd:str) -> None:
     subprocess.run(cmd, shell=True)
     return
 
-def parse_id_from_path(path: str) -> tuple[int, int]:
-    """
-    Extracts service and characteristic IDs from a Bluezero D-Bus path.
-
-    Example:
-        /ukBaz/bluezero/service0001/char0003  -> (1, 3)
-    """
-    parts = path.split('/')
-    service_str = parts[-2]  # e.g., "service0001"
-    char_str = parts[-1]     # e.g., "char0003"
-
-    service_id = int(service_str.replace('service', ''))
-    char_id = int(char_str.replace('char', ''))
-
-    return (service_id, char_id)
-
 def forget_pump_devices() -> None:
     """
     Forget all paired Bluetooth devices whose name starts with "Pump".

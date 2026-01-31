@@ -7,6 +7,8 @@ You can advertise, connect, perform the handshake and talk with a pump using thi
 
 Currently only Linux is supported.
 
+![screenshot](https://raw.githubusercontent.com/OpenMinimed/PythonPumpConnector/refs/heads/main/banner.png)
+
 
 ## MTU problem
 
@@ -36,3 +38,8 @@ By default, you will need to have a desktop client that handles the acceptance o
 ## Random failures
 
 Sometimes no BT traffic actually gets sent to the PC and we believe this is a GUI bug in the pump code. The workaround is very simple, just go back to the <code>Paired Devices > Pair New Device</code> menu and retry.
+
+
+## Debugging
+
+Use <code>btmon</code>. You can save a btsnoop file using the flag <code>-w</code>, that you can load with Wireshark later.
