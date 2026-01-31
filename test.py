@@ -15,39 +15,7 @@ from pysake.handshake_client import HandshakeClient
 
 from pump_advertiser import PumpAdvertiser
 from peripheral_handler import PeripheralHandler, BleService, BleChar
-
-
-CONNECTED = False
-MOBILE_NAME = None
-BLE = None
-SAKE_CHAR = None
-
-def adv_thread():
-    print("\n"*3)
-    print("-"*10 + " starting advertisement!" + "-"*10)
-    print(" "*10 + "(ignore error 0x0d)")
-    while True:
-        if not CONNECTED:
-            advertise(MOBILE_NAME)
-        sleep(0.1)
-
-def send_sake_notif():
-    zero = list(bytes.fromhex("00"*20))
-    print("calling sake char set value...")
-    SAKE_CHAR.set_value(zero)
-
-def notify_callback(notifying, char):
-    print("!!! NOTIFY")
-    # print("Notifications:", "enabled" if notifying else "disabled")
-    # if notifying:
-    #     # pump wants to be notified, start SAKE handshake
-    #     send_sake_notif()
-    return
-
-def write_callback(value, options):
-    print("!!! WRITE", value)
-    return
-
+from sake_handler import SakeHandler
 
 def main():
     global MOBILE_NAME, BLE, SAKE_CHAR
@@ -63,8 +31,9 @@ def main():
     # for now we need this hack, since if we did not create a sake connection, the device will forget it but our pc will not
     forget_pump_devices()
 
-    # create an advertiser
+    # create stuff
     pa = PumpAdvertiser()
+    sh = SakeHandler()
 
     # create the handler
     ph = PeripheralHandler()
@@ -87,26 +56,16 @@ def main():
     system_id = BleChar("2A23", "System ID", bytes(8))
     pnp_id = BleChar("2A50", "PNP ID", bytes(7))
     cert_data = BleChar("2A2A", "Certification Data List", bytes(0))
-    sake_port = BleChar("0000FE82-0000-1000-0000-009132591325", "Sake Port", None, notify_callback, write_callback)
+    sake_port = BleChar("0000FE82-0000-1000-0000-009132591325", "Sake Port", None, sh.notify_callback, sh.write_callback)
 
     # add all chars
     for char in [mn, mn_model, sn, hw_rev, fw_rev, sw_rev, system_id, pnp_id, cert_data]:
         ph.add_char(service_info_serv, char)
     ph.add_char(sake_serv, sake_port)
-    
-    # call bluezero and let it start advertising, but on a different thread
-    thread = Thread(target = ph.publish)
-    thread.start()
-
-    # but after it start our own advertising, since bluezero clears it (?) if we start it before
-    sleep(1)
+   
+    # before calling bluezero, start advertising
     pa.start_adv()
-    
-
-    # just like in embedded :^)
-    logging.info("entering main loop...")
-    while True:
-        sleep(1)
+    ph.publish()
 
     return
 

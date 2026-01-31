@@ -17,7 +17,8 @@ class BleChar(BleService):
 
     data:bytes
 
-    def __read_cb() -> list[bytes]:
+    def __read_cb_common(self) -> list[bytes]:
+        logging.debug(f"read callback for {self.name}!")
         return list(self.data)
 
     def __init__(self, uuid: str, name: str, read_data:bytes|str|None, notify_cb=None, write_cb=None):
@@ -28,7 +29,7 @@ class BleChar(BleService):
                 self.data = read_data.encode("utf-8")
             else:
                 self.data = read_data
-            self.read_cb = self.__read_cb
+            self.read_cb = self.__read_cb_common
         else:
             self.read_cb = None
 
