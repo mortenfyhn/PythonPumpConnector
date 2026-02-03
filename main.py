@@ -11,14 +11,13 @@ LogManager.init(level=logging.DEBUG)
 from utils import *
 
 add_submodule_to_path() # bit of hacking ;)
-from pysake.handshake_client import HandshakeClient
+
 
 from pump_advertiser import PumpAdvertiser
 from peripheral_handler import PeripheralHandler, BleService, BleChar
 from sake_handler import SakeHandler
 
 def main():
-    global MOBILE_NAME, BLE, SAKE_CHAR
 
     # check if bt is even on
     if not get_bluetooth_running():
