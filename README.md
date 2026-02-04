@@ -40,9 +40,12 @@ Tested and working versions:
 Setting IO capability to 3 (<code>NoInputNoOutput</code>) is also very important, because the device asks for the MITM flag, but does not support LE Secure Connections. This makes the kernel default to the Just Works method and will not immediately reject the pairing request. This is performed automatically by the script.
 
 
-## Desktop confirmation
+## Pairing confirmation
 
-By default, you will need to have a desktop client that handles the acceptance of pairing requests. If you are running in a headless mode, then the kernel automatically rejects the pairing requests. I am sure that there is a way to accept it from the CLI, but I have not checked it. Be ready for desktop notifications and quickly pressing accept on them!
+By default, you will need to have a desktop client that handles the acceptance of pairing requests. Be ready for desktop notifications and quickly pressing accept on them!
+
+If you are running in a headless mode, then the kernel automatically rejects the pairing requests. One way we got this to work on the command line was by running `bluetoothctl --agent=NoInputNoOutput` in a separate terminal before starting `main.py`. `bluetoothctl` will then prompt for accepting/declining the pairing request in the terminal.
+
 
 ## Random failures
 
