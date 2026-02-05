@@ -4,6 +4,7 @@ from time import sleep
 import sys
 import os
 import logging
+import psutil
 
 def add_submodule_to_path():
     d = os.path.dirname(os.path.abspath(__file__))
@@ -54,24 +55,16 @@ def forget_pump_devices() -> None:
         logging.error(f"Error running bluetoothctl: {e}")
     return
 
-import subprocess
-
 def is_bluetooth_active() -> bool:
-    # Check if bluetoothd is running
-    proc = subprocess.run(
-        ["pidof", "bluetoothd"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    """
+    If we dont check it, the script will hang somewhere.
+    """
 
-    if proc.returncode != 0:
-        return False  # daemon not running
+    for p in psutil.process_iter():
+        try:
+            if p.name() == "bluetoothd":
+                return True
+        except psutil.Error:
+            pass
 
-    # Check if systemd service is active
-    result = subprocess.run(
-        ["systemctl", "is-active", "bluetooth"],
-        capture_output=True,
-        text=True
-    )
-
-    return result.returncode == 0 and result.stdout.strip() == "active"
+    return False
