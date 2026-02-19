@@ -87,7 +87,7 @@ class SakeHandler:
 
                 if kind == "notify":
                     _, is_notifying, char = item
-                    self.logger.debug("got a sake notification!")
+                    self.logger.debug("got a sake notification start/stop request!")
                     self._handle_notify(is_notifying, char)
 
                 elif kind == "write":
